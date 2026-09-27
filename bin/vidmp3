@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Extract the audio of a video file as a 320k MP3 next to the original.
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: vidmp3 <video-file>" >&2
+  exit 1
+fi
+
+input="$1"
+
+if [[ ! -f "$input" ]]; then
+  echo "Error: file not found: $input" >&2
+  exit 1
+fi
+
+exec ffmpeg -i "$input" \
+  -vn \
+  -codec:a libmp3lame \
+  -b:a 320k \
+  -map_metadata 0 \
+  -id3v2_version 3 \
+  "${input%.*}.mp3"

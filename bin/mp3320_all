@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Run mp3320 on every wav/aif/aiff under the current directory, skipping existing mp3s.
+set -euo pipefail
+
+find . -type f \( -iname '*.wav' -o -iname '*.aif' -o -iname '*.aiff' \) -print0 |
+while IFS= read -r -d '' f; do
+  out="${f%.*}.mp3"
+
+  if [[ -f "$out" ]]; then
+    echo "Skipping: $out already exists"
+    continue
+  fi
+
+  # </dev/null: ffmpeg reads stdin, which here is the file list
+  mp3320 "$f" </dev/null || echo "Failed: $f" >&2
+done

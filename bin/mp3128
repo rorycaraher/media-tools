@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Convert one audio file to a 320k MP3 next to the original.
+# Convert one audio file to a 128k MP3 next to the original.
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then

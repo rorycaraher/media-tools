@@ -14,6 +14,7 @@ Dependencies: `ffmpeg` (with `libmp3lame`, `libx264`) for the shell scripts; Pyt
 - `mp3320_all` — recursively finds `.wav/.aif/.aiff` under the cwd and runs `mp3320` on each, skipping files whose `.mp3` already exists. The `</dev/null` on the `mp3320` call is deliberate: ffmpeg would otherwise consume the `find` file list from stdin.
 - `vidmp3 <video>` — extract audio from a video to a 320k MP3 (`-vn`).
 - `mp4shrink <in> [out] [crf=28] [height=720]` — H.264/AAC re-encode at reduced height (`scale=-2:H`).
+- `mp4clips [--copy] [--4x5] <video.mp4> <timestamps.txt>` — cuts clips into `<name>_clips/` next to the input. Each timestamps line is `start end [label...]` (ffmpeg time syntax; blank and `#` lines skipped; label becomes the filename, else `<name>_<NN>` by line number). All lines are validated (format, start < end, duplicate names) before any encoding; existing clips are skipped so reruns resume. Default is a frame-accurate libx264 CRF 18 / AAC 192k re-encode; `--copy` stream-copies (keyframe-snapped); `--4x5` exports 1080x1350 with the video fitted over a blurred, cropped copy of itself (incompatible with `--copy`).
 - `rbtracklist <tracklist.txt>` — reads a UTF-16LE tab-separated export (columns: `#`, Artist, Track Title, Label — Rekordbox-style), writes `<name>_label.txt` (`Artist - Title [Label]`) and `<name>_nolabel.txt` (`Artist - Title`) alongside the input. Rows whose first column isn't numeric are skipped as headers/blank.
 
 ## Conventions

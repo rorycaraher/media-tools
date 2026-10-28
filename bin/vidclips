@@ -3,7 +3,7 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: mp4clips [--copy] [--4x5] <video.mp4> <timestamps.txt>" >&2
+  echo "Usage: vidclips [--copy] [--4x5] <video file> <timestamps.txt>" >&2
   exit 1
 }
 
@@ -23,11 +23,11 @@ input="${args[0]}"
 stamps="${args[1]}"
 
 if [[ $copy -eq 1 && $fourfive -eq 1 ]]; then
-  echo "mp4clips: --copy and --4x5 cannot be combined (resizing needs a re-encode)" >&2
+  echo "vidclips: --copy and --4x5 cannot be combined (resizing needs a re-encode)" >&2
   exit 1
 fi
-[[ -f "$input" ]] || { echo "mp4clips: no such file: $input" >&2; exit 1; }
-[[ -f "$stamps" ]] || { echo "mp4clips: no such file: $stamps" >&2; exit 1; }
+[[ -f "$input" ]] || { echo "vidclips: no such file: $input" >&2; exit 1; }
+[[ -f "$stamps" ]] || { echo "vidclips: no such file: $stamps" >&2; exit 1; }
 
 base="$(basename "${input%.*}")"
 outdir="$(dirname "$input")/${base}_clips"
@@ -51,17 +51,17 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   [[ -z "$start" || "$start" == \#* ]] && continue
 
   if [[ -z "$end" ]]; then
-    echo "mp4clips: line $lineno: expected 'start end [label]'" >&2
+    echo "vidclips: line $lineno: expected 'start end [label]'" >&2
     exit 1
   fi
   for t in "$start" "$end"; do
     if ! [[ "$t" =~ $time_re ]]; then
-      echo "mp4clips: line $lineno: bad timestamp '$t'" >&2
+      echo "vidclips: line $lineno: bad timestamp '$t'" >&2
       exit 1
     fi
   done
   if ! awk -v a="$(to_seconds "$start")" -v b="$(to_seconds "$end")" 'BEGIN { exit !(a < b) }'; then
-    echo "mp4clips: line $lineno: start must be before end" >&2
+    echo "vidclips: line $lineno: start must be before end" >&2
     exit 1
   fi
 
@@ -72,7 +72,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     name="$(printf '%s_%02d' "$base" "$lineno")"
   fi
   if printf '%s\n' "$seen" | grep -Fxq -- "$name"; then
-    echo "mp4clips: line $lineno: duplicate clip name '$name'" >&2
+    echo "vidclips: line $lineno: duplicate clip name '$name'" >&2
     exit 1
   fi
   seen+="$name"$'\n'
@@ -85,7 +85,7 @@ done <"$stamps"
 
 total=${#names[@]}
 if [[ $total -eq 0 ]]; then
-  echo "mp4clips: no clips found in $stamps" >&2
+  echo "vidclips: no clips found in $stamps" >&2
   exit 1
 fi
 
@@ -122,7 +122,7 @@ for i in "${!names[@]}"; do
   partial="$out"
   if ! ffmpeg -loglevel error -stats -ss "$start" -to "$end" -i "$input" \
       "${codec[@]}" -movflags +faststart "$out" </dev/null; then
-    echo "mp4clips: ffmpeg failed on line ${lines[$i]} (${names[$i]})" >&2
+    echo "vidclips: ffmpeg failed on line ${lines[$i]} (${names[$i]})" >&2
     exit 1
   fi
   partial=""
